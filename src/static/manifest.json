@@ -1,0 +1,21 @@
+{
+    "manifest_version": 3,
+    "name": "Better Image Download",
+    "version": "1.0.0",
+    "description": "Download images in bulk by quickly selecting them on the page.",
+    "permissions": [
+        "activeTab",
+        "downloads",
+        "storage"
+    ],
+    "background": {
+        "service_worker": "script.js",
+        "scripts": ["script.js"]
+    },
+    "action": {
+        "default_popup": "popup.html"
+    },
+    "icons": {
+        "128": "icon_128.png"
+    }
+}
