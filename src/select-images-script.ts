@@ -43,6 +43,8 @@ class Toolbar {
 
     this.updateCounter();
 
+    this.addButtonHandlers();
+
     cleanCbs.push(() => this.dispose());
   }
 
@@ -94,6 +96,8 @@ class Toolbar {
         pageURL: location.href,
         images: this.#selectedImages.map((image) => image.url),
       });
+
+      clean();
     });
 
     this.#closeBtn.addEventListener("click", clean);
@@ -101,6 +105,11 @@ class Toolbar {
 
   dispose() {
     document.body.removeChild(this.#container);
+
+    this.#selectedImages.forEach((image) => {
+      delete image.el.dataset.betterImageDownload;
+    });
+
     this.#selectedImages = [];
   }
 }
@@ -122,7 +131,7 @@ function handleImageChange(toolbar: Toolbar) {
       if (!result) {
         targetElement.dataset.betterImageDownload = "true";
       } else {
-        targetElement.dataset.betterImageDownload = "";
+        delete targetElement.dataset.betterImageDownload;
       }
     }
 
@@ -178,7 +187,7 @@ function insertStyles() {
     }
 
     img[data-better-image-download="true"] {
-       border: 5px solid blue;
+       outline: 3px solid blue;
        opacity: 1;
     }
   `;
@@ -188,11 +197,13 @@ function insertStyles() {
 
   cleanCbs.push(() => {
     document.head.removeChild(newStyleEl);
+    StyleElement = null;
   });
 }
 
 function clean() {
   cleanCbs.forEach((fn) => fn());
+  cleanCbs = [];
 }
 
 if ("__reactivate" in window && typeof window.__reactivate === "function") {
