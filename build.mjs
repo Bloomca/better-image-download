@@ -49,7 +49,11 @@ function cleanDistDirectory() {
 
 function buildTypeScriptFiles(type) {
   return esbuild.build({
-    entryPoints: ["src/script.ts", "src/popup.ts", "src/content_script.ts"],
+    entryPoints: [
+      "src/script.ts",
+      "src/popup.ts",
+      "src/select-images-script.ts",
+    ],
     bundle: true,
     outdir: `dist/${type}`,
   });
