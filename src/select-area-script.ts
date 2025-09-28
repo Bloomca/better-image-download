@@ -1,6 +1,12 @@
 let StyleElement: HTMLStyleElement | null = null;
 let cleanCbs: Function[] = [];
 let overlayElement: HTMLElement | null = null;
+/**
+ * Actual element in DOM. We need to keep track of it to highlight
+ * all affected images if the user clicks on it.
+ */
+let overlayedElement: HTMLElement | null = null;
+let selectedElements: HTMLElement[] = [];
 
 function startAreaSelect() {
   insertStyles();
@@ -8,7 +14,7 @@ function startAreaSelect() {
 }
 
 function handleMouseEvents() {
-  document.addEventListener("mouseover", (event) => {
+  const mouseoverHandler = (event: MouseEvent) => {
     // ignore any bubbling
     event.preventDefault();
 
@@ -17,7 +23,41 @@ function handleMouseEvents() {
     }
 
     return false;
-  });
+  };
+  document.addEventListener("mouseover", mouseoverHandler);
+
+  const cleanupCb = () => {
+    document.removeEventListener("mouseover", mouseoverHandler);
+  };
+  cleanCbs.push(cleanupCb);
+
+  let clickCleanupCb = () => {
+    // pass
+  };
+  const clickHandler = (event: PointerEvent) => {
+    event.preventDefault();
+
+    if (overlayElement) {
+      selectElement(overlayElement);
+      cleanupCb();
+      cleanCbs = cleanCbs.filter(
+        (cb) => cb !== cleanupCb && cb !== clickCleanupCb
+      );
+    }
+
+    return false;
+  };
+  document.addEventListener("click", clickHandler);
+  clickCleanupCb = () => {
+    document.removeEventListener("click", clickHandler);
+  };
+
+  cleanCbs.push(clickCleanupCb);
+}
+
+function selectElement(element: HTMLElement) {
+  selectedElements.push(element);
+  //   element.dataset.
 }
 
 function renderOverlay(element: HTMLElement) {
@@ -32,6 +72,13 @@ function renderOverlay(element: HTMLElement) {
 
   overlayEl.style.top = `${topScroll + elementRect.top}px`;
   overlayEl.style.left = `${leftScroll + elementRect.left}px`;
+
+  if (overlayedElement) {
+    delete overlayedElement.dataset.betterImageDownloadOverlayed;
+  }
+
+  overlayedElement = element;
+  element.dataset.betterImageDownloadOverlayed = "true";
 }
 
 function createOverlayElement() {
@@ -87,18 +134,14 @@ function insertStyles() {
     }
 
     img {
-        cursor: pointer;
         opacity: 0.5;
         transition: 0.2s opacity;
     }
 
-    img:hover {
+    [data-better-image-download-overlayed="true"] img,
+    img[data-better-image-download-overlayed="true"] {
+        outline: 3px solid blue;
         opacity: 1;
-    }
-
-    img[data-better-image-download="true"] {
-       outline: 3px solid blue;
-       opacity: 1;
     }
   `;
   document.head.appendChild(newStyleEl);
