@@ -1,7 +1,7 @@
 {
   "name": "better-image-download",
   "version": "1.0.0",
-  "main": "src/main.ts",
+  "main": "src/script.ts",
   "scripts": {
     "build": "node build.mjs",
     "test": "echo \"Error: no test specified\" && exit 1"
