@@ -23,8 +23,7 @@ await writeManifest(FIREFOX_DIR);
  * them separately
  */
 async function writeManifest(type) {
-  const staticDir = path.join(__dirname, "src", "static");
-  const manifestPath = path.join(staticDir, "manifest.json");
+  const manifestPath = path.join(__dirname, "src", "manifest.json");
   const manifest = JSON.parse(
     await readFile(new URL(manifestPath, import.meta.url))
   );
