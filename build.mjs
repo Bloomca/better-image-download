@@ -53,6 +53,7 @@ function buildTypeScriptFiles(type) {
       "src/script.ts",
       "src/popup.ts",
       "src/select-images-script.ts",
+      "src/select-area-script.ts",
     ],
     bundle: true,
     outdir: `dist/${type}`,

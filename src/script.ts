@@ -15,7 +15,13 @@ chrome.runtime.onMessage.addListener(async function handleMessage(
 
   if (typeof message === "object" && "action" in message) {
     if (message.action === "selectArea") {
-      // send selecting area
+      const [activeTab] = await getActiveTab();
+      if (activeTab?.id) {
+        chrome.scripting.executeScript({
+          target: { tabId: activeTab?.id },
+          files: ["select-area-script.js"],
+        });
+      }
     } else if (message.action === "selectImages") {
       const [activeTab] = await getActiveTab();
       if (activeTab?.id) {
