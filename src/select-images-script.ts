@@ -1,4 +1,7 @@
+import type { DownloadImagesMessage } from "./types";
+
 let StyleElement: HTMLStyleElement | null;
+let cleanCbs: Function[] = [];
 
 function startImageSelect() {
   insertStyles();
@@ -39,6 +42,8 @@ class Toolbar {
     buttonContainer.appendChild(this.#closeBtn);
 
     this.updateCounter();
+
+    cleanCbs.push(() => this.dispose());
   }
 
   updateCounter() {
@@ -83,55 +88,60 @@ class Toolbar {
       // should never happen
       if (this.#selectedImages.length === 0) return;
 
-      // TODO: send download message
+      chrome.runtime.sendMessage<DownloadImagesMessage>({
+        action: "downloadImages",
+        title: document.title,
+        pageURL: location.href,
+        images: this.#selectedImages.map((image) => image.url),
+      });
     });
 
-    this.#closeBtn.addEventListener("click", () => {
-      // ?????
-    });
+    this.#closeBtn.addEventListener("click", clean);
   }
 
   dispose() {
     document.body.removeChild(this.#container);
+    this.#selectedImages = [];
   }
 }
 
 function handleImageChange(toolbar: Toolbar) {
-  document.addEventListener(
-    "click",
-    (event) => {
-      const targetElement = event.target;
-      if (
-        targetElement instanceof HTMLImageElement &&
-        targetElement.tagName === "IMG"
-      ) {
-        const result = toolbar.toggleImage(targetElement);
+  const imageClickHandler = (event: PointerEvent) => {
+    const targetElement = event.target;
+    if (
+      targetElement instanceof HTMLImageElement &&
+      targetElement.tagName === "IMG"
+    ) {
+      const result = toolbar.toggleImage(targetElement);
 
-        if (result === null) {
-          console.log("result was null, meaning that source was not found");
-          return;
-        }
-
-        if (!result) {
-          targetElement.dataset.betterImageDownload = "true";
-        } else {
-          targetElement.dataset.betterImageDownload = "";
-        }
+      if (result === null) {
+        console.log("result was null, meaning that source was not found");
+        return;
       }
 
-      // to avoid any image events
-      event.preventDefault();
-      return false;
-    },
-    true
-  );
+      if (!result) {
+        targetElement.dataset.betterImageDownload = "true";
+      } else {
+        targetElement.dataset.betterImageDownload = "";
+      }
+    }
+
+    // to avoid any image events
+    event.preventDefault();
+    return false;
+  };
+  document.addEventListener("click", imageClickHandler, true);
+
+  cleanCbs.push(() => {
+    document.removeEventListener("click", imageClickHandler, true);
+  });
 }
 
 function insertStyles() {
   if (StyleElement) return;
 
-  StyleElement = document.createElement("style");
-  StyleElement.textContent = `
+  const newStyleEl = document.createElement("style");
+  newStyleEl.textContent = `
     .better-images-download-toolbar {
         position: fixed;
         bottom: 50px;
@@ -172,7 +182,17 @@ function insertStyles() {
        opacity: 1;
     }
   `;
-  document.head.appendChild(StyleElement);
+  document.head.appendChild(newStyleEl);
+
+  StyleElement = newStyleEl;
+
+  cleanCbs.push(() => {
+    document.head.removeChild(newStyleEl);
+  });
+}
+
+function clean() {
+  cleanCbs.forEach((fn) => fn());
 }
 
 if ("__reactivate" in window && typeof window.__reactivate === "function") {
