@@ -61,13 +61,13 @@ export function insertStyles() {
     }
 
     img[data-better-image-download="true"] {
-       outline: 3px solid blue;
+       border: 3px solid blue;
        opacity: 1;
     }
 
     [data-better-image-download-overlayed="true"] img,
     img[data-better-image-download-overlayed="true"] {
-        outline: 3px solid blue;
+        border: 3px solid blue;
         opacity: 1;
     }
   `;
