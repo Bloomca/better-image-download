@@ -13,6 +13,7 @@ class AppState {
 
   setMode(mode: "selectImages" | "selectArea") {
     this.#mode = mode;
+    this.#toolbar?.updateMode();
   }
 
   getMode() {

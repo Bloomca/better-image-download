@@ -9,6 +9,8 @@ export class Toolbar {
   #downloadBtn: HTMLButtonElement;
   #closeBtn: HTMLButtonElement;
   #onClose: Function;
+  #selectImageInput: HTMLInputElement;
+  #selectAreaInput: HTMLInputElement;
 
   constructor(onClose: Function) {
     this.#onClose = onClose;
@@ -27,9 +29,9 @@ export class Toolbar {
     imageRadioInput.name = "better-image-download-type";
     imageRadioInput.value = "selectImages";
     imageRadioInput.id = "selectImages";
-    // if (appState.getMode() === "selectImages") {
-    //   imageRadioInput.checked = true;
-    // }
+    if (appState.getMode() === "selectImages") {
+      imageRadioInput.checked = true;
+    }
     imageRadioContainer.appendChild(imageRadioInput);
     radioButtonContainer.appendChild(imageRadioContainer);
 
@@ -40,12 +42,15 @@ export class Toolbar {
     areaRadioInput.name = "better-image-download-type";
     areaRadioInput.value = "selectArea";
     areaRadioInput.id = "selectArea";
-    // if (appState.getMode() === "selectArea") {
-    //   areaRadioInput.checked = true;
-    // }
+    if (appState.getMode() === "selectArea") {
+      areaRadioInput.checked = true;
+    }
     areaRadioContainer.appendChild(areaRadioInput);
     radioButtonContainer.appendChild(areaRadioContainer);
     this.#container.appendChild(radioButtonContainer);
+
+    this.#selectImageInput = imageRadioInput;
+    this.#selectAreaInput = areaRadioInput;
 
     const buttonContainer = document.createElement("div");
     this.#container.appendChild(buttonContainer);
@@ -62,6 +67,7 @@ export class Toolbar {
     this.updateCounter();
 
     this.addButtonHandlers();
+    this.addRadioButtonhandlers();
   }
 
   updateCounter() {
@@ -76,6 +82,16 @@ export class Toolbar {
     } else {
       this.#counter.innerHTML = `${num} images selected`;
       this.#downloadBtn.disabled = false;
+    }
+  }
+
+  updateMode() {
+    const mode = appState.getMode();
+
+    if (mode === "selectArea") {
+      this.#selectAreaInput.checked = true;
+    } else {
+      this.#selectImageInput.checked = true;
     }
   }
 
@@ -107,6 +123,26 @@ export class Toolbar {
     this.#closeBtn.addEventListener("click", () => {
       appState.clean();
       this.dispose();
+    });
+  }
+
+  addRadioButtonhandlers() {
+    this.#selectImageInput.addEventListener("change", (event) => {
+      if (event.target instanceof HTMLInputElement && event.target.checked) {
+        if (appState.getMode() !== "selectImages") {
+          appState.setMode("selectImages");
+          appState.start();
+        }
+      }
+    });
+
+    this.#selectAreaInput.addEventListener("change", (event) => {
+      if (event.target instanceof HTMLInputElement && event.target.checked) {
+        if (appState.getMode() !== "selectArea") {
+          appState.setMode("selectArea");
+          appState.start();
+        }
+      }
     });
   }
 

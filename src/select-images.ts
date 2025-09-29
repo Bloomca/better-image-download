@@ -16,11 +16,14 @@ function handleImageChange(toolbar: Toolbar) {
       targetElement instanceof HTMLImageElement &&
       targetElement.tagName === "IMG"
     ) {
+      // to avoid any image events
+      event.preventDefault();
+
       const result = toolbar.toggleImage(targetElement);
 
       if (result === null) {
         console.log("result was null, meaning that source was not found");
-        return;
+        return false;
       }
 
       if (!result) {
@@ -28,11 +31,9 @@ function handleImageChange(toolbar: Toolbar) {
       } else {
         delete targetElement.dataset.betterImageDownload;
       }
-    }
 
-    // to avoid any image events
-    event.preventDefault();
-    return false;
+      return false;
+    }
   };
   document.addEventListener("click", imageClickHandler, true);
 
