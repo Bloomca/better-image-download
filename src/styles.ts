@@ -11,14 +11,26 @@ export function insertStyles() {
         display: flex;
         flex-direction: row;
         z-index: 9999999999;
-        left: calc(50% - 225px);
-        width: 450px;
+        left: calc(50% - 275px);
+        width: 550px;
         background: cyan;
         padding: 10px 15px;
         border-radius: 5px;
         border: 1px solid rgba(0, 0, 255, 0.5);
         justify-content: space-between;
         align-items: center;
+    }
+
+    .better-images-download-toolbar fieldset {
+        display: flex;
+    }
+
+    .better-images-download-toolbar fieldset label {
+        margin-right: 5px;
+    }
+
+    .better-images-download-toolbar fieldset label input {
+      margin-left: 2px;
     }
 
     .better-image-download-overlay {
