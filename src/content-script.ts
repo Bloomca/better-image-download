@@ -1,12 +1,13 @@
-import { startImageSelect } from "./select-images";
-import { startAreaSelect } from "./select-area";
+import { appState } from "./app-state";
 
 function start(type: string) {
   if (type === "selectImages") {
-    startImageSelect();
+    appState.setMode("selectImages");
   } else if (type === "selectArea") {
-    startAreaSelect();
+    appState.setMode("selectArea");
   }
+
+  appState.start();
 }
 
 // @ts-ignore we can declare new properties

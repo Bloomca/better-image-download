@@ -10,7 +10,9 @@ let overlayedElement: HTMLElement | null = null;
 let selectedElements: HTMLElement[] = [];
 
 export function startAreaSelect() {
+  appState.setMode("selectArea");
   insertStyles();
+  appState.createToolbar();
   handleMouseEvents();
 }
 

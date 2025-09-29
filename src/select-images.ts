@@ -3,8 +3,9 @@ import { insertStyles } from "./styles";
 import { appState } from "./app-state";
 
 export function startImageSelect() {
+  appState.setMode("selectImages");
   insertStyles();
-  const toolbar = new Toolbar();
+  const toolbar = appState.createToolbar();
   handleImageChange(toolbar);
 }
 

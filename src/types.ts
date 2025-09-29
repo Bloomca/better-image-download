@@ -12,3 +12,8 @@ export type DownloadImagesMessage = {
   pageURL: string;
   images: string[];
 };
+
+export type SelectedImage = {
+  url: string;
+  el: HTMLImageElement;
+};

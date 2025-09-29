@@ -1,5 +1,3 @@
-import { appState } from "./app-state";
-
 let StyleElement: HTMLStyleElement | null;
 
 export function insertStyles() {
@@ -13,8 +11,8 @@ export function insertStyles() {
         display: flex;
         flex-direction: row;
         z-index: 9999999999;
-        left: calc(50% - 175px);
-        width: 350px;
+        left: calc(50% - 225px);
+        width: 450px;
         background: cyan;
         padding: 10px 15px;
         border-radius: 5px;
@@ -64,9 +62,11 @@ export function insertStyles() {
   document.head.appendChild(newStyleEl);
 
   StyleElement = newStyleEl;
+}
 
-  appState.addCleanupCb(() => {
-    document.head.removeChild(newStyleEl);
+export function cleanStyles() {
+  if (StyleElement) {
+    document.head.removeChild(StyleElement);
     StyleElement = null;
-  });
+  }
 }
