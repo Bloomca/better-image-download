@@ -12,6 +12,17 @@ export function startImageSelect() {
 function handleImageChange(toolbar: Toolbar) {
   const imageClickHandler = (event: PointerEvent) => {
     const targetElement = event.target;
+
+    if (targetElement instanceof HTMLElement) {
+      const link = targetElement.closest("a");
+      // if the user clicked on a link, we don't want to navigate away
+      // so we forcefully prevent navigation while extension is active
+      if (link && link.href) {
+        event.preventDefault();
+        event.stopPropagation();
+      }
+    }
+
     if (
       targetElement instanceof HTMLImageElement &&
       targetElement.tagName === "IMG"
