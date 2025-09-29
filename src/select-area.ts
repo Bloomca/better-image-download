@@ -7,7 +7,6 @@ let overlayElement: HTMLElement | null = null;
  * all affected images if the user clicks on it.
  */
 let overlayedElement: HTMLElement | null = null;
-let selectedElements: HTMLElement[] = [];
 
 export function startAreaSelect() {
   appState.setMode("selectArea");
@@ -40,8 +39,8 @@ function handleMouseEvents() {
   const clickHandler = (event: PointerEvent) => {
     event.preventDefault();
 
-    if (overlayElement) {
-      selectElement(overlayElement);
+    if (overlayedElement) {
+      selectElement(overlayedElement);
       cleanupCb();
       appState.removeCleanupCb(cleanupCb);
       appState.removeCleanupCb(clickCleanupCb);
@@ -58,8 +57,7 @@ function handleMouseEvents() {
 }
 
 function selectElement(element: HTMLElement) {
-  selectedElements.push(element);
-  //   element.dataset.
+  appState.selectElement(element);
 }
 
 function renderOverlay(element: HTMLElement) {
@@ -92,6 +90,9 @@ function createOverlayElement() {
 
   appState.addCleanupCb(() => {
     document.body.removeChild(newOverlayElement);
+
+    overlayElement = null;
+    overlayedElement = null;
   });
 
   return newOverlayElement;

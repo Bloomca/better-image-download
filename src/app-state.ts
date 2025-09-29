@@ -80,11 +80,6 @@ class AppState {
   selectElement(element: HTMLElement) {
     const imgElements = element.querySelectorAll("img");
 
-    if (imgElements.length === 0) {
-      // do nothing
-      return;
-    }
-
     for (const imageEl of imgElements) {
       const source = imageEl.getAttribute("src");
 
