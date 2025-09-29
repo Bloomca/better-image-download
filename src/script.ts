@@ -17,18 +17,54 @@ chrome.runtime.onMessage.addListener(async function handleMessage(
     if (message.action === "selectArea") {
       const [activeTab] = await getActiveTab();
       if (activeTab?.id) {
-        chrome.scripting.executeScript({
-          target: { tabId: activeTab?.id },
-          files: ["select-area-script.js"],
+        const [result] = await chrome.scripting.executeScript({
+          target: { tabId: activeTab.id },
+          func: () => {
+            // @ts-ignore
+            if (window.__reactivate) {
+              // @ts-ignore
+              window.__reactivate("selectArea");
+              return true;
+            } else {
+              // @ts-ignore
+              window.__betterImageDownloadAction = "selectArea";
+              return false;
+            }
+          },
         });
+
+        if (result.result !== true) {
+          chrome.scripting.executeScript({
+            target: { tabId: activeTab?.id },
+            files: ["content-script.js"],
+          });
+        }
       }
     } else if (message.action === "selectImages") {
       const [activeTab] = await getActiveTab();
       if (activeTab?.id) {
-        chrome.scripting.executeScript({
-          target: { tabId: activeTab?.id },
-          files: ["select-images-script.js"],
+        const [result] = await chrome.scripting.executeScript({
+          target: { tabId: activeTab.id },
+          func: () => {
+            // @ts-ignore
+            if (window.__reactivate) {
+              // @ts-ignore
+              window.__reactivate("selectImages");
+              return true;
+            } else {
+              // @ts-ignore
+              window.__betterImageDownloadAction = "selectImages";
+              return false;
+            }
+          },
         });
+
+        if (result.result !== true) {
+          chrome.scripting.executeScript({
+            target: { tabId: activeTab?.id },
+            files: ["content-script.js"],
+          });
+        }
       }
     } else if (isMessageDownloadImages(message)) {
       downloadImages(message);
