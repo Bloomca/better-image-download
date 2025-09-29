@@ -92,6 +92,11 @@ function createOverlayElement() {
     document.body.removeChild(newOverlayElement);
 
     overlayElement = null;
+
+    if (overlayedElement) {
+      delete overlayedElement.dataset.betterImageDownloadOverlayed;
+    }
+
     overlayedElement = null;
   });
 
