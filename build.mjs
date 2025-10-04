@@ -35,6 +35,13 @@ async function writeManifest(type) {
     delete manifest.background.scripts;
   } else {
     delete manifest.background.service_worker;
+
+    // Firefox-specific extension ID
+    manifest.browser_specific_settings = {
+      gecko: {
+        id: "better_image_download_mail@bloomca.me",
+      },
+    };
   }
 
   writeFile(
