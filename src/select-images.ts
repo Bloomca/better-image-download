@@ -29,21 +29,28 @@ function handleImageChange(toolbar: Toolbar) {
     ) {
       // to avoid any image events
       event.preventDefault();
-
-      const result = toolbar.toggleImage(targetElement);
-
-      if (result === null) {
-        console.log("result was null, meaning that source was not found");
-        return false;
-      }
-
-      if (!result) {
-        targetElement.dataset.betterImageDownload = "true";
-      } else {
-        delete targetElement.dataset.betterImageDownload;
-      }
-
+      toggleElement(targetElement, toolbar);
       return false;
+    } else if (targetElement instanceof HTMLElement) {
+      /**
+       * If the user has the extension active in the images mode and they clicked on non-image element,
+       * there is a good chance the element is covering the actual image behind it.
+       */
+
+      const allImages = document.querySelectorAll("img");
+
+      const targetRect = targetElement.getBoundingClientRect();
+
+      console.log(targetRect);
+
+      for (const image of allImages) {
+        if (compareRects(targetRect, image.getBoundingClientRect())) {
+          // to avoid any image events
+          event.preventDefault();
+          toggleElement(image, toolbar);
+          return false;
+        }
+      }
     }
   };
   document.addEventListener("click", imageClickHandler, true);
@@ -51,4 +58,37 @@ function handleImageChange(toolbar: Toolbar) {
   appState.addCleanupCb(() => {
     document.removeEventListener("click", imageClickHandler, true);
   });
+}
+
+function toggleElement(element: HTMLImageElement, toolbar: Toolbar) {
+  const result = toolbar.toggleImage(element);
+
+  if (result === null) {
+    console.log("result was null, meaning that source was not found");
+    return false;
+  }
+
+  if (!result) {
+    element.dataset.betterImageDownload = "true";
+  } else {
+    delete element.dataset.betterImageDownload;
+  }
+}
+
+function compareRects(el1: DOMRect, el2: DOMRect) {
+  return [
+    areValuesClose(el1.bottom, el2.bottom),
+    areValuesClose(el1.height, el2.height),
+    areValuesClose(el1.left, el2.left),
+    areValuesClose(el1.right, el2.right),
+  ].every((value) => value);
+}
+
+// precision is in pixels
+function areValuesClose(
+  value1: number,
+  value2: number,
+  precision = 5
+): boolean {
+  return Math.abs(value1 - value2) < precision;
 }

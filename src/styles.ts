@@ -63,13 +63,15 @@ export function insertStyles() {
     }
 
     img[data-better-image-download="true"] {
-       border: 3px solid #6f6fea !important;
+       border: 2px solid #6f6fea !important;
+       box-sizing: border-box;
        opacity: 1;
     }
 
     [data-better-image-download-overlayed="true"] img,
     img[data-better-image-download-overlayed="true"] {
-        border: 3px solid #6f6fea !important;
+        border: 2px solid #6f6fea !important;
+        box-sizing: border-box;
         opacity: 1;
     }
   `;
