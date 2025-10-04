@@ -11,8 +11,8 @@ export function insertStyles() {
         display: flex;
         flex-direction: row;
         z-index: 9999999999;
-        left: calc(50% - 275px);
-        width: 550px;
+        left: calc(50% - 300px);
+        width: 600px;
         background: cyan;
         padding: 10px 15px;
         border-radius: 5px;
@@ -26,7 +26,9 @@ export function insertStyles() {
     }
 
     .better-images-download-toolbar fieldset label {
-        margin-right: 5px;
+        margin-left: 4px;
+        margin-right: 4px;
+        display: flex;
     }
 
     .better-images-download-toolbar fieldset label input {
@@ -61,13 +63,13 @@ export function insertStyles() {
     }
 
     img[data-better-image-download="true"] {
-       border: 3px solid blue;
+       border: 3px solid #6f6fea !important;
        opacity: 1;
     }
 
     [data-better-image-download-overlayed="true"] img,
     img[data-better-image-download-overlayed="true"] {
-        border: 3px solid blue;
+        border: 3px solid #6f6fea !important;
         opacity: 1;
     }
   `;
