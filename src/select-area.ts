@@ -15,8 +15,15 @@ export function startAreaSelect() {
 function handleMouseEvents() {
   const startCoordinates = { x: 0, y: 0 };
   const endCoordinates = { x: 0, y: 0 };
+
+  function preventSelection(e: Event) {
+    e.preventDefault();
+  }
+
   const mouseDownHandler = function mouseDownHandler(event: MouseEvent) {
     updateCoordinates(startCoordinates, event);
+
+    document.addEventListener("selectstart", preventSelection);
 
     const mouseMoveHandler = function mouseMoveHandler(event: MouseEvent) {
       updateCoordinates(endCoordinates, event);
@@ -33,6 +40,7 @@ function handleMouseEvents() {
     const mouseUpHandler = function mouseUpHandler() {
       moveCleanup();
       mouseUpCleanup();
+      document.removeEventListener("selectstart", preventSelection);
       selectArea(startCoordinates, endCoordinates);
       startCoordinates.x = 0;
       startCoordinates.y = 0;
