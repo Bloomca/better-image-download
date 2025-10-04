@@ -6,6 +6,7 @@ import type { DownloadImagesMessage } from "./types";
 export class Toolbar {
   #container: HTMLElement;
   #counter: HTMLElement;
+  #resetBtn: HTMLButtonElement;
   #downloadBtn: HTMLButtonElement;
   #closeBtn: HTMLButtonElement;
   #onClose: Function;
@@ -55,6 +56,11 @@ export class Toolbar {
     const buttonContainer = document.createElement("div");
     this.#container.appendChild(buttonContainer);
 
+    this.#resetBtn = document.createElement("button");
+    this.#resetBtn.innerText = "Reset";
+    this.#resetBtn.disabled = true;
+    buttonContainer.appendChild(this.#resetBtn);
+
     this.#downloadBtn = document.createElement("button");
     this.#downloadBtn.innerText = "Download";
     this.#downloadBtn.disabled = true;
@@ -76,12 +82,15 @@ export class Toolbar {
     if (num === 0) {
       this.#counter.innerHTML = "No images selected";
       this.#downloadBtn.disabled = true;
+      this.#resetBtn.disabled = true;
     } else if (num === 1) {
       this.#counter.innerHTML = "1 image selected";
       this.#downloadBtn.disabled = false;
+      this.#resetBtn.disabled = false;
     } else {
       this.#counter.innerHTML = `${num} images selected`;
       this.#downloadBtn.disabled = false;
+      this.#resetBtn.disabled = false;
     }
   }
 
@@ -123,6 +132,11 @@ export class Toolbar {
     this.#closeBtn.addEventListener("click", () => {
       appState.clean();
       this.dispose();
+    });
+
+    this.#resetBtn.addEventListener("click", () => {
+      appState.resetSelectedImages();
+      this.updateCounter();
     });
   }
 

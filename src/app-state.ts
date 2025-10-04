@@ -107,6 +107,11 @@ class AppState {
     return this.#selectedImages;
   }
 
+  /**
+   * Resets selected images, but does not touch the toolbar. The styles
+   * in the HTML will be correctly stripped, so previously selected
+   * images will lose the selected border.
+   */
   resetSelectedImages() {
     this.#selectedImages.forEach((image) => {
       delete image.el.dataset.betterImageDownload;
