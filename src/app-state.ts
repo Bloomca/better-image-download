@@ -119,6 +119,26 @@ class AppState {
 
     this.#selectedImages = [];
   }
+
+  selectAllImages() {
+    const imageElements = document.querySelectorAll("img");
+
+    for (const imageEl of imageElements) {
+      const source = imageEl.getAttribute("src");
+
+      if (!source) continue;
+
+      const hasImage =
+        this.#selectedImages.findIndex((image) => image.el === imageEl) !== -1;
+
+      if (!hasImage) {
+        this.#selectedImages.push({ el: imageEl, url: source });
+        imageEl.dataset.betterImageDownload = "true";
+      }
+    }
+
+    this.#toolbar?.updateCounter();
+  }
 }
 
 const appState = new AppState();

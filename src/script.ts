@@ -2,6 +2,7 @@ import type {
   DownloadImagesMessage,
   SelectAreaMessage,
   SelectImagesMessage,
+  SelectAllImagesMessage,
 } from "./types";
 
 chrome.runtime.onMessage.addListener(async function handleMessage(
@@ -9,54 +10,34 @@ chrome.runtime.onMessage.addListener(async function handleMessage(
     | DownloadImagesMessage
     | SelectAreaMessage
     | SelectImagesMessage
+    | SelectAllImagesMessage
     | unknown
 ) {
   if (!message) return;
 
   if (typeof message === "object" && "action" in message) {
-    if (message.action === "selectArea") {
+    if (
+      message.action === "selectArea" ||
+      message.action === "selectImages" ||
+      message.action === "selectAllImages"
+    ) {
       const [activeTab] = await getActiveTab();
       if (activeTab?.id) {
         const [result] = await chrome.scripting.executeScript({
           target: { tabId: activeTab.id },
-          func: () => {
+          func: (messageType: string) => {
             // @ts-ignore
             if (window.__reactivate) {
               // @ts-ignore
-              window.__reactivate("selectArea");
+              window.__reactivate(messageType);
               return true;
             } else {
               // @ts-ignore
-              window.__betterImageDownloadAction = "selectArea";
+              window.__betterImageDownloadAction = messageType;
               return false;
             }
           },
-        });
-
-        if (result.result !== true) {
-          chrome.scripting.executeScript({
-            target: { tabId: activeTab?.id },
-            files: ["content-script.js"],
-          });
-        }
-      }
-    } else if (message.action === "selectImages") {
-      const [activeTab] = await getActiveTab();
-      if (activeTab?.id) {
-        const [result] = await chrome.scripting.executeScript({
-          target: { tabId: activeTab.id },
-          func: () => {
-            // @ts-ignore
-            if (window.__reactivate) {
-              // @ts-ignore
-              window.__reactivate("selectImages");
-              return true;
-            } else {
-              // @ts-ignore
-              window.__betterImageDownloadAction = "selectImages";
-              return false;
-            }
-          },
+          args: [message.action],
         });
 
         if (result.result !== true) {
