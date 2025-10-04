@@ -10,6 +10,10 @@ export type SelectAllImagesMessage = {
   action: "selectAllImages";
 };
 
+export type SelectContainerMessage = {
+  action: "selectContainer";
+};
+
 export type DownloadImagesMessage = {
   action: "downloadImages";
   title: string;

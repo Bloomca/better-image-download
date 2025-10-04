@@ -5,6 +5,8 @@ function start(type: string) {
     appState.setMode("selectImages");
   } else if (type === "selectArea") {
     appState.setMode("selectArea");
+  } else if (type === "selectContainer") {
+    appState.setMode("selectContainer");
   } else if (type === "selectAllImages") {
     appState.setMode("selectImages");
     appState.selectAllImages();

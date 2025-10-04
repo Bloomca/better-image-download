@@ -12,6 +12,7 @@ export class Toolbar {
   #onClose: Function;
   #selectImageInput: HTMLInputElement;
   #selectAreaInput: HTMLInputElement;
+  #selectContainerInput: HTMLInputElement;
 
   constructor(onClose: Function) {
     this.#onClose = onClose;
@@ -48,10 +49,25 @@ export class Toolbar {
     }
     areaRadioContainer.appendChild(areaRadioInput);
     radioButtonContainer.appendChild(areaRadioContainer);
+
+    const containerRadioContainer = document.createElement("label");
+    containerRadioContainer.innerText = "Container";
+    const containerRadioInput = document.createElement("input");
+    containerRadioInput.type = "radio";
+    containerRadioInput.name = "better-image-download-type";
+    containerRadioInput.value = "selectContainer";
+    containerRadioInput.id = "selectContainer";
+    if (appState.getMode() === "selectContainer") {
+      containerRadioInput.checked = true;
+    }
+    containerRadioContainer.appendChild(containerRadioInput);
+    radioButtonContainer.appendChild(containerRadioContainer);
+
     this.#container.appendChild(radioButtonContainer);
 
     this.#selectImageInput = imageRadioInput;
     this.#selectAreaInput = areaRadioInput;
+    this.#selectContainerInput = containerRadioInput;
 
     const buttonContainer = document.createElement("div");
     this.#container.appendChild(buttonContainer);
@@ -99,7 +115,9 @@ export class Toolbar {
 
     if (mode === "selectArea") {
       this.#selectAreaInput.checked = true;
-    } else {
+    } else if (mode === "selectContainer") {
+      this.#selectContainerInput.checked = true;
+    } else if (mode === "selectImages") {
       this.#selectImageInput.checked = true;
     }
   }
@@ -158,6 +176,19 @@ export class Toolbar {
         }
       }
     });
+
+    this.#selectContainerInput.addEventListener("change", (event) => {
+      if (event.target instanceof HTMLInputElement && event.target.checked) {
+        if (appState.getMode() !== "selectContainer") {
+          appState.setMode("selectContainer");
+          appState.start();
+        }
+      }
+    });
+  }
+
+  isToolbarElement(element: HTMLElement): boolean {
+    return this.#container.contains(element);
   }
 
   dispose() {

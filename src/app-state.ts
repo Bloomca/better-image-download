@@ -1,5 +1,6 @@
 import { Toolbar } from "./toolbar";
 import { startImageSelect } from "./select-images";
+import { startContainerSelect } from "./select-container";
 import { startAreaSelect } from "./select-area";
 
 import type { SelectedImage } from "./types";
@@ -9,9 +10,9 @@ class AppState {
   #selectedImages: SelectedImage[] = [];
   #toolbar: Toolbar | null = null;
 
-  #mode: "selectImages" | "selectArea" = "selectImages";
+  #mode: "selectImages" | "selectArea" | "selectContainer" = "selectImages";
 
-  setMode(mode: "selectImages" | "selectArea") {
+  setMode(mode: "selectImages" | "selectArea" | "selectContainer") {
     this.#mode = mode;
     this.#toolbar?.updateMode();
   }
@@ -26,6 +27,8 @@ class AppState {
 
     if (this.#mode === "selectImages") {
       startImageSelect();
+    } else if (this.#mode === "selectContainer") {
+      startContainerSelect();
     } else if (this.#mode === "selectArea") {
       startAreaSelect();
     }
@@ -99,7 +102,6 @@ class AppState {
     }
 
     this.#toolbar?.updateCounter();
-    this.setMode("selectImages");
     this.start();
   }
 
@@ -124,20 +126,24 @@ class AppState {
     const imageElements = document.querySelectorAll("img");
 
     for (const imageEl of imageElements) {
-      const source = imageEl.getAttribute("src");
-
-      if (!source) continue;
-
-      const hasImage =
-        this.#selectedImages.findIndex((image) => image.el === imageEl) !== -1;
-
-      if (!hasImage) {
-        this.#selectedImages.push({ el: imageEl, url: source });
-        imageEl.dataset.betterImageDownload = "true";
-      }
+      this.addImage(imageEl);
     }
 
     this.#toolbar?.updateCounter();
+  }
+
+  addImage(imageEl: HTMLImageElement) {
+    const source = imageEl.getAttribute("src");
+
+    if (!source) return;
+
+    const hasImage =
+      this.#selectedImages.findIndex((image) => image.el === imageEl) !== -1;
+
+    if (!hasImage) {
+      this.#selectedImages.push({ el: imageEl, url: source });
+      imageEl.dataset.betterImageDownload = "true";
+    }
   }
 }
 

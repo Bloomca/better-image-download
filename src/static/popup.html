@@ -14,6 +14,11 @@
         font-size: 16px;
       }
 
+      .container {
+        display: flex;
+        flex-direction: row;
+      }
+
       #settings > div {
         padding-bottom: 7px;
         margin-bottom: 7px;
@@ -23,12 +28,14 @@
   </head>
   <body>
     <h1 class="title">Better Image Download</h1>
-    <div>
-        <button id="selectArea">Select area</button>
-        <button id="selectImages">Select images</button>
-        <button id="selectAllImages">Select all images</button>
+    <div class="buttons">
+        Select 
+        <button id="selectArea">area</button>
+        <button id="selectImages">images</button>
+        <button id="selectAllImages">all</button>
+        <button id="selectContainer">container</button>
     </div>
-    <p>You can switch the mode later from the toolbar; after selecting an area, it automatically switches to the images mode.</p>
+    <p>You can switch the mode later from the toolbar.</p>
     <section id="settings">
       Future settings
     </section>

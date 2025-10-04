@@ -3,6 +3,7 @@ import type {
   SelectAreaMessage,
   SelectImagesMessage,
   SelectAllImagesMessage,
+  SelectContainerMessage,
 } from "./types";
 
 chrome.runtime.onMessage.addListener(async function handleMessage(
@@ -11,6 +12,7 @@ chrome.runtime.onMessage.addListener(async function handleMessage(
     | SelectAreaMessage
     | SelectImagesMessage
     | SelectAllImagesMessage
+    | SelectContainerMessage
     | unknown
 ) {
   if (!message) return;
@@ -19,7 +21,8 @@ chrome.runtime.onMessage.addListener(async function handleMessage(
     if (
       message.action === "selectArea" ||
       message.action === "selectImages" ||
-      message.action === "selectAllImages"
+      message.action === "selectAllImages" ||
+      message.action === "selectContainer"
     ) {
       const [activeTab] = await getActiveTab();
       if (activeTab?.id) {

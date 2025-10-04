@@ -2,11 +2,8 @@ import { appState } from "./app-state";
 import { insertStyles } from "./styles";
 
 let overlayElement: HTMLElement | null = null;
-/**
- * Actual element in DOM. We need to keep track of it to highlight
- * all affected images if the user clicks on it.
- */
-let overlayedElement: HTMLElement | null = null;
+
+type Coordinates = { x: number; y: number };
 
 export function startAreaSelect() {
   appState.setMode("selectArea");
@@ -16,69 +13,81 @@ export function startAreaSelect() {
 }
 
 function handleMouseEvents() {
-  const mouseoverHandler = (event: MouseEvent) => {
-    // ignore any bubbling
-    event.preventDefault();
+  const startCoordinates = { x: 0, y: 0 };
+  const endCoordinates = { x: 0, y: 0 };
+  const mouseDownHandler = function mouseDownHandler(event: MouseEvent) {
+    updateCoordinates(startCoordinates, event);
 
-    if (event.target && event.target instanceof HTMLElement) {
-      renderOverlay(event.target);
-    }
+    const mouseMoveHandler = function mouseMoveHandler(event: MouseEvent) {
+      updateCoordinates(endCoordinates, event);
+      renderOverlay(startCoordinates, endCoordinates);
+    };
 
-    return false;
+    document.addEventListener("mousemove", mouseMoveHandler);
+
+    const moveCleanup = appState.addCleanupCb(() =>
+      document.removeEventListener("mousemove", mouseMoveHandler)
+    );
+
+    let mouseUpCleanup = () => {};
+    const mouseUpHandler = function mouseUpHandler() {
+      moveCleanup();
+      mouseUpCleanup();
+      selectArea(startCoordinates, endCoordinates);
+      startCoordinates.x = 0;
+      startCoordinates.y = 0;
+      endCoordinates.x = 0;
+      endCoordinates.y = 0;
+      const toolbar = appState.createToolbar();
+      toolbar.updateCounter();
+
+      if (overlayElement) {
+        document.body.removeChild(overlayElement);
+        overlayElement = null;
+      }
+    };
+
+    document.addEventListener("mouseup", mouseUpHandler);
+
+    mouseUpCleanup = () => {
+      document.removeEventListener("mouseup", mouseUpHandler);
+    };
+
+    appState.addCleanupCb(mouseUpCleanup);
   };
-  document.addEventListener("mouseover", mouseoverHandler);
+  document.addEventListener("mousedown", mouseDownHandler);
 
-  const cleanupCb = () => {
-    document.removeEventListener("mouseover", mouseoverHandler);
-  };
-  appState.addCleanupCb(cleanupCb);
-
-  let clickCleanupCb = () => {
-    // pass
-  };
-  const clickHandler = (event: PointerEvent) => {
-    event.preventDefault();
-
-    if (overlayedElement) {
-      selectElement(overlayedElement);
-      cleanupCb();
-      appState.removeCleanupCb(cleanupCb);
-      appState.removeCleanupCb(clickCleanupCb);
-    }
-
-    return false;
-  };
-  document.addEventListener("click", clickHandler);
-  clickCleanupCb = () => {
-    document.removeEventListener("click", clickHandler);
-  };
-
-  appState.addCleanupCb(clickCleanupCb);
+  appState.addCleanupCb(() => {
+    document.removeEventListener("mousedown", mouseDownHandler);
+  });
 }
 
-function selectElement(element: HTMLElement) {
-  appState.selectElement(element);
-}
-
-function renderOverlay(element: HTMLElement) {
-  const overlayEl = overlayElement ? overlayElement : createOverlayElement();
-  const elementRect = element.getBoundingClientRect();
-
-  overlayEl.style.width = `${elementRect.width}px`;
-  overlayEl.style.height = `${elementRect.height}px`;
-
+// MUTATES coordinates value in-place
+function updateCoordinates(coordinates: Coordinates, event: MouseEvent) {
   const topScroll = document.documentElement.scrollTop;
   const leftScroll = document.documentElement.scrollLeft;
 
-  overlayEl.style.top = `${topScroll + elementRect.top}px`;
-  overlayEl.style.left = `${leftScroll + elementRect.left}px`;
+  coordinates.x = leftScroll + event.x;
+  coordinates.y = topScroll + event.y;
+}
 
-  if (overlayedElement) {
-    delete overlayedElement.dataset.betterImageDownloadOverlayed;
-  }
+function renderOverlay(
+  startCoordinates: Coordinates,
+  endCoordinates: Coordinates
+) {
+  const overlayEl = overlayElement ? overlayElement : createOverlayElement();
 
-  overlayedElement = element;
-  element.dataset.betterImageDownloadOverlayed = "true";
+  const top = Math.min(startCoordinates.y, endCoordinates.y);
+  const bottom = Math.max(startCoordinates.y, endCoordinates.y);
+
+  overlayEl.style.top = `${top}px`;
+  overlayEl.style.height = `${bottom - top}px`;
+
+  const left = Math.min(startCoordinates.x, endCoordinates.x);
+  const right = Math.max(startCoordinates.x, endCoordinates.x);
+
+  overlayEl.style.left = `${left}px`;
+  overlayEl.style.width = `${right - left}px`;
 }
 
 function createOverlayElement() {
@@ -89,16 +98,50 @@ function createOverlayElement() {
   overlayElement = newOverlayElement;
 
   appState.addCleanupCb(() => {
-    document.body.removeChild(newOverlayElement);
-
-    overlayElement = null;
-
-    if (overlayedElement) {
-      delete overlayedElement.dataset.betterImageDownloadOverlayed;
+    if (document.body.contains(newOverlayElement)) {
+      document.body.removeChild(newOverlayElement);
     }
 
-    overlayedElement = null;
+    if (overlayElement && document.body.contains(overlayElement)) {
+      document.body.removeChild(overlayElement);
+      overlayElement = null;
+    }
   });
 
   return newOverlayElement;
+}
+
+function selectArea(
+  startCoordinates: Coordinates,
+  endCoordinates: Coordinates
+) {
+  const topScroll = document.documentElement.scrollTop;
+  const leftScroll = document.documentElement.scrollLeft;
+  const imageElements = document.querySelectorAll("img");
+
+  const left = Math.min(startCoordinates.x, endCoordinates.x);
+  const right = Math.max(startCoordinates.x, endCoordinates.x);
+
+  const top = Math.min(startCoordinates.y, endCoordinates.y);
+  const bottom = Math.max(startCoordinates.y, endCoordinates.y);
+
+  for (const imageEl of imageElements) {
+    const rect = imageEl.getBoundingClientRect();
+
+    const imageX = leftScroll + rect.x;
+    const imageXEnd = imageX + rect.width;
+    const imageY = topScroll + rect.y;
+    const imageYEnd = imageY + rect.height;
+
+    const insideH =
+      (imageX > left && imageX < right) ||
+      (imageXEnd > left && imageXEnd < right);
+    const insideY =
+      (imageY > top && imageY < bottom) ||
+      (imageYEnd > top && imageYEnd < bottom);
+
+    if (insideH && insideY) {
+      appState.addImage(imageEl);
+    }
+  }
 }
