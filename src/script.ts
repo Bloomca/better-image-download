@@ -36,7 +36,7 @@ chrome.runtime.onMessage.addListener(async function handleMessage(
               return true;
             } else {
               // @ts-ignore
-              window.__betterImageDownloadAction = messageType;
+              window.__betterImageDownload = { action: messageType };
               return false;
             }
           },
@@ -78,18 +78,31 @@ function getActiveTab() {
   return chrome.tabs.query({ active: true, lastFocusedWindow: true });
 }
 
-function downloadImages(message: DownloadImagesMessage) {
+async function downloadImages(message: DownloadImagesMessage) {
+  const { preserveFilenames } = await chrome.storage.local.get([
+    "preserveFilenames",
+  ]);
+
   const folderName = getFolderName(message);
-  message.images.forEach((imageURL) => {
+  message.images.forEach((imageURL, index) => {
     chrome.downloads.download({
-      filename: `${folderName}/${getFilename(imageURL)}`,
+      filename: `${folderName}/${getFilename(
+        imageURL,
+        preserveFilenames,
+        index
+      )}`,
       conflictAction: "uniquify",
       url: imageURL,
     });
   });
 }
 
-function getFilename(imageURL: string) {
+function getFilename(imageURL: string, preserveFilenames: any, index: number) {
+  if (typeof preserveFilenames === "boolean" && preserveFilenames === false) {
+    const filenameElements = imageURL.split(".");
+    return `${index + 1}.${filenameElements[filenameElements.length - 1]}`;
+  }
+
   const urlElements = imageURL.split("/");
   return urlElements[urlElements.length - 1];
 }

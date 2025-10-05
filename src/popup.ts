@@ -39,3 +39,31 @@ document.addEventListener("DOMContentLoaded", async () => {
     window.close();
   });
 });
+
+async function setSavedValues() {
+  const { preserveFilenames } = await chrome.storage.local.get([
+    "preserveFilenames",
+  ]);
+
+  const preserveFilenamesCheckbox =
+    document.getElementById("preserveFilenames");
+
+  if (
+    preserveFilenamesCheckbox instanceof HTMLInputElement &&
+    preserveFilenames !== false
+  ) {
+    preserveFilenamesCheckbox.checked = true;
+  }
+
+  preserveFilenamesCheckbox?.addEventListener("change", (event) => {
+    if (event.target instanceof HTMLInputElement) {
+      chrome.storage.local.set({
+        preserveFilenames: event.target.checked,
+      });
+    }
+  });
+}
+
+setSavedValues().catch(() => {
+  // pass
+});

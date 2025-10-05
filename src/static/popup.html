@@ -19,25 +19,41 @@
         flex-direction: row;
       }
 
+      #settings {
+        border-top: 1px solid #ccc;
+      }
+
       #settings > div {
         padding-bottom: 7px;
         margin-bottom: 7px;
         border-bottom: 1px solid rgba(31, 46, 116, 0.25);
+      }
+
+      .hint {
+        font-size: 90%;
+        font-style: italic;
       }
     </style>
   </head>
   <body>
     <h1 class="title">Better Image Download</h1>
     <div class="buttons">
-        Select 
-        <button id="selectArea">area</button>
-        <button id="selectImages">images</button>
-        <button id="selectAllImages">all</button>
-        <button id="selectContainer">container</button>
+      Select
+      <button id="selectArea">area</button>
+      <button id="selectImages">images</button>
+      <button id="selectAllImages">all</button>
+      <button id="selectContainer">container</button>
     </div>
     <p>You can switch the mode later from the toolbar.</p>
     <section id="settings">
-      Future settings
+      <h2>Settings</h2>
+      <div>
+        <label>
+          Preserve filenames:
+          <input id="preserveFilenames" type="checkbox" />
+        </label>
+        <div class="hint">If unchecked, files will be named "1", "2", "3", etc</div>
+      </div>
     </section>
     <script src="popup.js"></script>
   </body>
