@@ -18,4 +18,4 @@ function start(type: string) {
 // @ts-ignore we can declare new properties
 window.__reactivate = start;
 // @ts-ignore this property is set by background script
-start(window.__betterImageDownloadAction);
+start(window.__betterImageDownload?.action || "selectImages");

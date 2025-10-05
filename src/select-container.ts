@@ -37,11 +37,9 @@ function handleMouseEvents() {
     // pass
   };
   const clickHandler = (event: PointerEvent) => {
-    if (event.target instanceof HTMLElement) {
-      if (appState.createToolbar().isToolbarElement(event.target)) {
-        // do nothing, otherwise we can prevent toolbar events
-        return;
-      }
+    if (appState.createToolbar().isToolbarElement(event.target)) {
+      // do nothing, otherwise we can prevent toolbar events
+      return;
     }
 
     event.preventDefault();

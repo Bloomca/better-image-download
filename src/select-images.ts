@@ -41,8 +41,6 @@ function handleImageChange(toolbar: Toolbar) {
 
       const targetRect = targetElement.getBoundingClientRect();
 
-      console.log(targetRect);
-
       for (const image of allImages) {
         if (compareRects(targetRect, image.getBoundingClientRect())) {
           // to avoid any image events

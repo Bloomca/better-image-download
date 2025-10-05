@@ -23,14 +23,14 @@ function handleMouseEvents() {
   const mouseDownHandler = function mouseDownHandler(event: MouseEvent) {
     updateCoordinates(startCoordinates, event);
 
-    document.addEventListener("selectstart", preventSelection);
-
     const mouseMoveHandler = function mouseMoveHandler(event: MouseEvent) {
       updateCoordinates(endCoordinates, event);
       renderOverlay(startCoordinates, endCoordinates);
     };
 
     document.addEventListener("mousemove", mouseMoveHandler);
+
+    document.addEventListener("selectstart", preventSelection);
 
     const moveCleanup = appState.addCleanupCb(() =>
       document.removeEventListener("mousemove", mouseMoveHandler)
@@ -67,6 +67,7 @@ function handleMouseEvents() {
 
   appState.addCleanupCb(() => {
     document.removeEventListener("mousedown", mouseDownHandler);
+    document.removeEventListener("selectstart", preventSelection);
   });
 }
 

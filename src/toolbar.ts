@@ -187,8 +187,12 @@ export class Toolbar {
     });
   }
 
-  isToolbarElement(element: HTMLElement): boolean {
-    return this.#container.contains(element);
+  isToolbarElement(element: EventTarget | null): boolean {
+    if (element instanceof HTMLElement) {
+      return this.#container.contains(element);
+    }
+
+    return false;
   }
 
   dispose() {
