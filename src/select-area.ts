@@ -22,6 +22,7 @@ function handleMouseEvents() {
 
   const mouseDownHandler = function mouseDownHandler(event: MouseEvent) {
     updateCoordinates(startCoordinates, event);
+    updateCoordinates(endCoordinates, event);
 
     const mouseMoveHandler = function mouseMoveHandler(event: MouseEvent) {
       updateCoordinates(endCoordinates, event);
@@ -37,7 +38,9 @@ function handleMouseEvents() {
     );
 
     let mouseUpCleanup = () => {};
-    const mouseUpHandler = function mouseUpHandler() {
+    const mouseUpHandler = function mouseUpHandler(event: MouseEvent) {
+      updateCoordinates(endCoordinates, event);
+
       moveCleanup();
       mouseUpCleanup();
       document.removeEventListener("selectstart", preventSelection);
