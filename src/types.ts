@@ -24,4 +24,5 @@ export type DownloadImagesMessage = {
 export type SelectedImage = {
   url: string;
   el: HTMLImageElement;
+  overlay: HTMLElement;
 };

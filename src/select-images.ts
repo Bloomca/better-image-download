@@ -2,6 +2,8 @@ import { Toolbar } from "./toolbar";
 import { insertStyles } from "./styles";
 import { appState } from "./app-state";
 
+import type { SelectedImage } from "./types";
+
 export function startImageSelect() {
   appState.setMode("selectImages");
   insertStyles();
@@ -12,6 +14,11 @@ export function startImageSelect() {
 function handleImageChange(toolbar: Toolbar) {
   const imageClickHandler = (event: PointerEvent) => {
     const targetElement = event.target;
+
+    // let toolbar handle the event by itself
+    if (appState.createToolbar().isToolbarElement(targetElement)) {
+      return;
+    }
 
     if (targetElement instanceof HTMLElement) {
       const link = targetElement.closest("a");
@@ -29,9 +36,19 @@ function handleImageChange(toolbar: Toolbar) {
     ) {
       // to avoid any image events
       event.preventDefault();
+      event.stopPropagation();
       toggleElement(targetElement, toolbar);
       return false;
     } else if (targetElement instanceof HTMLElement) {
+      if (targetElement.dataset.betterImageSelectedOverlay === "true") {
+        event.preventDefault();
+        event.stopPropagation();
+
+        appState.removeImageByOverlay(targetElement);
+
+        return false;
+      }
+
       /**
        * If the user has the extension active in the images mode and they clicked on non-image element,
        * there is a good chance the element is covering the actual image behind it.
@@ -39,12 +56,16 @@ function handleImageChange(toolbar: Toolbar) {
 
       const allImages = document.querySelectorAll("img");
 
-      const targetRect = targetElement.getBoundingClientRect();
-
       for (const image of allImages) {
-        if (compareRects(targetRect, image.getBoundingClientRect())) {
+        if (
+          clickedInside(image.getBoundingClientRect(), {
+            x: event.x,
+            y: event.y,
+          })
+        ) {
           // to avoid any image events
           event.preventDefault();
+          event.stopPropagation();
           toggleElement(image, toolbar);
           return false;
         }
@@ -66,27 +87,38 @@ function toggleElement(element: HTMLImageElement, toolbar: Toolbar) {
     return false;
   }
 
-  if (!result) {
-    element.dataset.betterImageDownload = "true";
+  if (!result.existed) {
+    applyElementSelection(result.selected);
   } else {
-    delete element.dataset.betterImageDownload;
+    clearElementSelection(result.selected);
   }
 }
 
-function compareRects(el1: DOMRect, el2: DOMRect) {
-  return [
-    areValuesClose(el1.bottom, el2.bottom),
-    areValuesClose(el1.height, el2.height),
-    areValuesClose(el1.left, el2.left),
-    areValuesClose(el1.right, el2.right),
-  ].every((value) => value);
+export function applyElementSelection(selectedElement: SelectedImage) {
+  selectedElement.overlay.classList.add("better-image-download-selected-image");
+  selectedElement.overlay.dataset.betterImageSelectedOverlay = "true";
+  const rect = selectedElement.el.getBoundingClientRect();
+  const top = document.documentElement.scrollTop + rect.y;
+  selectedElement.overlay.style.top = `${top}px`;
+  const left = document.documentElement.scrollLeft + rect.x;
+  selectedElement.overlay.style.left = `${left}px`;
+  selectedElement.overlay.style.height = `${rect.height}px`;
+  selectedElement.overlay.style.width = `${rect.width}px`;
+
+  document.body.appendChild(selectedElement.overlay);
 }
 
-// precision is in pixels
-function areValuesClose(
-  value1: number,
-  value2: number,
-  precision = 5
-): boolean {
-  return Math.abs(value1 - value2) < precision;
+export function clearElementSelection(selectedElement: SelectedImage) {
+  if (document.body.contains(selectedElement.overlay)) {
+    document.body.removeChild(selectedElement.overlay);
+  }
+}
+
+function clickedInside(target: DOMRect, coords: { x: number; y: number }) {
+  const insideH =
+    coords.x >= target.left && coords.x <= target.left + target.width;
+  const insideY =
+    coords.y >= target.top && coords.y <= target.top + target.height;
+
+  return insideH && insideY;
 }

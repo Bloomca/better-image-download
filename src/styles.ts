@@ -62,17 +62,28 @@ export function insertStyles() {
         opacity: 1;
     }
 
-    img[data-better-image-download="true"] {
-       border: 2px solid #6f6fea !important;
-       box-sizing: border-box;
-       opacity: 1;
-    }
-
+    img[data-better-image-download="true"],
     [data-better-image-download-overlayed="true"] img,
     img[data-better-image-download-overlayed="true"] {
         border: 2px solid #6f6fea !important;
+        outline: 2px solid #6f6fea !important;
         box-sizing: border-box;
         opacity: 1;
+    }
+
+    img[data-better-image-download="true"]::after,
+    [data-better-image-download-overlayed="true"] img::after,
+    img[data-better-image-download-overlayed="true"]:: after {
+      position: absolute;
+      content: '\\2714';  /* ✔ */
+    }
+
+    .better-image-download-selected-image {
+      position: absolute;
+      background: rgba(38, 235, 16, 0.35);
+      box-sizing: border-box;
+      border: 3px solid rgba(14, 78, 7, 1);
+      border-radius: 5px;
     }
   `;
   document.head.appendChild(newStyleEl);

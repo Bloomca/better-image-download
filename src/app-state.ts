@@ -1,5 +1,9 @@
 import { Toolbar } from "./toolbar";
-import { startImageSelect } from "./select-images";
+import {
+  startImageSelect,
+  applyElementSelection,
+  clearElementSelection,
+} from "./select-images";
 import { startContainerSelect } from "./select-container";
 import { startAreaSelect } from "./select-area";
 
@@ -61,23 +65,47 @@ class AppState {
     this.#cleanupFns = [];
   }
 
-  toggleImage(imageEl: HTMLImageElement): boolean | null {
-    const source = imageEl.getAttribute("src");
+  toggleImage(
+    imageEl: HTMLImageElement,
+    source: string
+  ): {
+    existed: boolean;
+    selected: SelectedImage;
+  } {
+    const imageIndex = this.#selectedImages.findIndex(
+      (image) => image.el === imageEl
+    );
 
-    if (!source) return null;
-
-    const hasImage =
-      this.#selectedImages.findIndex((image) => image.el === imageEl) !== -1;
-
-    if (hasImage) {
+    if (imageIndex !== -1) {
+      const oldElement = this.#selectedImages[imageIndex];
       this.#selectedImages = this.#selectedImages.filter(
         (image) => image.el != imageEl
       );
-      return true;
+      return { existed: true, selected: oldElement };
     } else {
-      this.#selectedImages.push({ el: imageEl, url: source });
-      return false;
+      const overlay = document.createElement("div");
+      const newElement: SelectedImage = {
+        el: imageEl,
+        url: source,
+        overlay,
+      };
+      this.#selectedImages.push(newElement);
+      return { existed: false, selected: newElement };
     }
+  }
+
+  removeImageByOverlay(overlay: HTMLElement) {
+    const imageToRemove = this.#selectedImages.find(
+      (image) => image.overlay === overlay
+    );
+
+    if (imageToRemove) {
+      clearElementSelection(imageToRemove);
+    }
+
+    this.#selectedImages = this.#selectedImages.filter(
+      (image) => image.overlay !== overlay
+    );
   }
 
   selectElement(element: HTMLElement) {
@@ -92,11 +120,14 @@ class AppState {
           -1;
 
         if (!alreadySelected) {
-          imageEl.dataset.betterImageDownload = "true";
-          this.#selectedImages.push({
+          const overlay = document.createElement("div");
+          const newElement: SelectedImage = {
             el: imageEl,
             url: source,
-          });
+            overlay,
+          };
+          applyElementSelection(newElement);
+          this.#selectedImages.push(newElement);
         }
       }
     }
@@ -115,10 +146,7 @@ class AppState {
    * images will lose the selected border.
    */
   resetSelectedImages() {
-    this.#selectedImages.forEach((image) => {
-      delete image.el.dataset.betterImageDownload;
-    });
-
+    this.#selectedImages.forEach(clearElementSelection);
     this.#selectedImages = [];
   }
 
@@ -141,8 +169,14 @@ class AppState {
       this.#selectedImages.findIndex((image) => image.el === imageEl) !== -1;
 
     if (!hasImage) {
-      this.#selectedImages.push({ el: imageEl, url: source });
-      imageEl.dataset.betterImageDownload = "true";
+      const overlay = document.createElement("div");
+      const newElement: SelectedImage = {
+        el: imageEl,
+        url: source,
+        overlay,
+      };
+      applyElementSelection(newElement);
+      this.#selectedImages.push(newElement);
     }
   }
 }

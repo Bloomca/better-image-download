@@ -1,7 +1,8 @@
 import { appState } from "./app-state";
 import { cleanStyles } from "./styles";
+import { getImageSource } from "./utils";
 
-import type { DownloadImagesMessage } from "./types";
+import type { DownloadImagesMessage, SelectedImage } from "./types";
 
 export class Toolbar {
   #container: HTMLElement;
@@ -123,8 +124,14 @@ export class Toolbar {
   }
 
   // returns whether the image was selected before
-  toggleImage(imageEl: HTMLImageElement): boolean | null {
-    const result = appState.toggleImage(imageEl);
+  toggleImage(
+    imageEl: HTMLImageElement
+  ): { existed: boolean; selected: SelectedImage } | null {
+    const source = getImageSource(imageEl);
+
+    if (!source) return null;
+
+    const result = appState.toggleImage(imageEl, source);
 
     if (result !== null) this.updateCounter();
 
